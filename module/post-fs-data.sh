@@ -8,4 +8,4 @@ MODE="$(cat "$MODE_FILE" 2>/dev/null)"
 
 # PackageManager reads package-restrictions early. Run here so reboot applies
 # the selected state without touching the system partition.
-MODDIR="$MODDIR" "$MODDIR/common/patch.sh" "$MODE" >/dev/null 2>&1
+MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" "$MODE" >/dev/null 2>&1

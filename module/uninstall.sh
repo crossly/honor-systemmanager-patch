@@ -2,4 +2,4 @@
 
 MODDIR=${0%/*}
 echo "restore" > "$MODDIR/mode"
-MODDIR="$MODDIR" "$MODDIR/common/patch.sh" restore >/dev/null 2>&1 || true
+MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" restore >/dev/null 2>&1 || true

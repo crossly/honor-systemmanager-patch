@@ -13,5 +13,5 @@ echo "[$(date '+%F %T')] boot completed, mode=$MODE" >> "$LOG"
 # Late pass only records and re-applies the file for next boot. It intentionally
 # avoids stop/start framework loops during normal boot.
 if [ "$MODE" = "block" ] || [ "$MODE" = "restore" ]; then
-  MODDIR="$MODDIR" "$MODDIR/common/patch.sh" "$MODE" >/dev/null 2>&1
+  MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" "$MODE" >/dev/null 2>&1
 fi

@@ -12,5 +12,7 @@ fi
 
 echo "$NEW_MODE" > "$MODE_FILE"
 echo "Switching HONOR System Manager Patch to: $NEW_MODE"
-MODDIR="$MODDIR" "$MODDIR/common/patch.sh" "$NEW_MODE" || exit 1
+MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" "$NEW_MODE" || exit 1
 echo "Mode changed. Reboot to make PackageManager reload restrictions cleanly."
+echo
+MODDIR="$MODDIR" sh "$MODDIR/common/status.sh" || true

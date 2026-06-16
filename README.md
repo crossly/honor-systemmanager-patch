@@ -36,7 +36,7 @@ Those are left enabled to reduce the chance of breaking permission management, n
 Flash the zip from KernelSU Manager:
 
 ```text
-dist/honor-systemmanager-patch-v1.0.0.zip
+dist/honor-systemmanager-patch-v1.1.0.zip
 ```
 
 During install:
@@ -49,7 +49,13 @@ Reboot after flashing. PackageManager only reloads component restrictions cleanl
 
 ## Switch Mode Later
 
-The module includes `action.sh`. Running the module action toggles between:
+The module includes a KernelSU WebUI. Use the module's Open button to access:
+
+- Test Status
+- Block Services
+- Restore Services
+
+The module also includes `action.sh`. Running the module action toggles between:
 
 - `block`
 - `restore`
@@ -112,3 +118,13 @@ If Settings, permission prompts, battery pages, or system manager pages behave b
 - `dist/`: flashable zip
 - `docs/context.md`: investigation notes and rationale
 - `scripts/build.sh`: rebuild flashable zip from `module/`
+
+## Status Check
+
+From ADB:
+
+```sh
+adb shell su -c 'MODDIR=/data/adb/modules/honor-systemmanager-patch /data/adb/modules/honor-systemmanager-patch/common/status.sh'
+```
+
+The status check reports per-user package restriction state and whether any target service is currently running.
