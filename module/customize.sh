@@ -39,7 +39,6 @@ set_permissions() {
   set_perm "$MODPATH/common/status.sh" 0 0 0755
   set_perm "$MODPATH/post-fs-data.sh" 0 0 0755
   set_perm "$MODPATH/service.sh" 0 0 0755
-  set_perm "$MODPATH/action.sh" 0 0 0755
   set_perm "$MODPATH/uninstall.sh" 0 0 0755
 }
 
@@ -49,7 +48,8 @@ on_install() {
   ui_print "Target: MagicOS / HONOR com.hihonor.systemmanager"
   unzip -o "$ZIPFILE" 'common/*' -d "$MODPATH" >&2
   unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
-  unzip -o "$ZIPFILE" 'module.prop' 'post-fs-data.sh' 'service.sh' 'action.sh' 'uninstall.sh' -d "$MODPATH" >&2
+  unzip -o "$ZIPFILE" 'module.prop' 'post-fs-data.sh' 'service.sh' 'uninstall.sh' -d "$MODPATH" >&2
+  rm -f "$MODPATH/action.sh"
   choose_mode
   ui_print "Applying selected package-restrictions patch once..."
   MODDIR="$MODPATH" sh "$MODPATH/common/patch.sh" "$(cat "$MODPATH/mode")" || ui_print "Patch apply failed during install; it will retry on boot."

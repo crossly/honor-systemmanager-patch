@@ -36,7 +36,7 @@ Those are left enabled to reduce the chance of breaking permission management, n
 Flash the zip from KernelSU Manager:
 
 ```text
-dist/honor-systemmanager-patch-v1.1.0.zip
+dist/honor-systemmanager-patch-v1.2.0.zip
 ```
 
 During install:
@@ -49,16 +49,11 @@ Reboot after flashing. PackageManager only reloads component restrictions cleanl
 
 ## Switch Mode Later
 
-The module includes a KernelSU WebUI. Use the module's Open button to access:
+The module includes a KernelSU WebUI. Use the module's Open button to access all runtime functions:
 
 - Test Status
 - Block Services
 - Restore Services
-
-The module also includes `action.sh`. Running the module action toggles between:
-
-- `block`
-- `restore`
 
 Reboot after toggling for a clean PackageManager reload.
 
