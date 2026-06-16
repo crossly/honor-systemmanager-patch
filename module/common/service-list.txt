@@ -1,0 +1,12 @@
+com.hihonor.securitycenter.mainservice.HwSecService
+com.hihonor.securitycenter.antifraud.audioevent.AudioDetectService
+com.hihonor.antivirus.AntiVirusService
+com.hihonor.systemmanager.service.MainService
+com.hihonor.systemmanager.spacecleanner.service.AppCleanUpService
+com.hihonor.securitycenter.privacy.monthlyreport.service.YoyoCardService
+com.hihonor.securitycenter.antifraud.fakedetect.FakeDetectService
+com.hihonor.securitycenter.blockads.BlockAdsService
+com.hihonor.android.security.inspection.AppBASMngService
+com.hihonor.systemmanager.appcontrol.service.SmartControlResidentService
+com.hihonor.android.security.analyzer.AppBehaviorDataAnalyzerService
+com.hihonor.securitycenter.antifraud.aigc.AigcDetectService

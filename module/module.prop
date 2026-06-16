@@ -1,0 +1,6 @@
+id=honor-systemmanager-patch
+name=HONOR System Manager Patch
+version=v1.0.0
+versionCode=100
+author=Codex
+description=Disable or restore selected HONOR System Manager services via package restrictions.
