@@ -32,6 +32,30 @@ function exec(command) {
   });
 }
 
+function setProfileStatus(profile, mode) {
+  const pill = document.querySelector(`[data-status="${profile}"]`);
+  if (!pill) return;
+  pill.textContent = mode;
+  pill.dataset.mode = mode;
+}
+
+async function readProfileMode(profile) {
+  const mode = await exec(`cat ${modulePath}/modes/${profile} 2>/dev/null || cat ${modulePath}/mode 2>/dev/null || echo unknown`);
+  return mode.trim();
+}
+
+async function refreshModes() {
+  await Promise.all(
+    profiles.map(async (profile) => {
+      try {
+        setProfileStatus(profile, await readProfileMode(profile));
+      } catch {
+        setProfileStatus(profile, "unknown");
+      }
+    }),
+  );
+}
+
 async function run(label, command) {
   if (running) return;
   running = true;
@@ -49,16 +73,11 @@ async function run(label, command) {
 async function loadVersion() {
   try {
     const version = await exec(`grep '^version=' ${modulePath}/module.prop | cut -d= -f2`);
-    const modes = await Promise.all(
-      profiles.map(async (profile) => {
-        const mode = await exec(`cat ${modulePath}/modes/${profile} 2>/dev/null || cat ${modulePath}/mode 2>/dev/null || echo unknown`);
-        return `${profile}: ${mode.trim()}`;
-      }),
-    );
-    document.getElementById("version").textContent = `${version.trim()} · ${modes.join(" · ")}`;
+    document.getElementById("version").textContent = version.trim();
   } catch {
     document.getElementById("version").textContent = "module status unavailable";
   }
+  refreshModes();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -73,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `${mode} ${profile}`,
         `mkdir -p ${modulePath}/modes && echo ${mode} > ${modulePath}/modes/${profile} && MODDIR=${modulePath} sh ${modulePath}/common/patch.sh ${mode} ${profile} && MODDIR=${modulePath} sh ${modulePath}/common/status.sh ${profile}`,
       );
-      loadVersion();
+      refreshModes();
     });
   });
   document.getElementById("clear").addEventListener("click", () => {

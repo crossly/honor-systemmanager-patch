@@ -10,44 +10,52 @@
 </head>
 <body>
   <main class="content">
-    <header>
-      <h2>HONOR System Manager Patch</h2>
-      <p id="version">Loading...</p>
-    </header>
-
-    <section class="toolbar">
-      <button id="status">Test All Status</button>
+    <section class="topbar">
+      <div>
+        <h2>HONOR Patch</h2>
+        <p id="version">Loading...</p>
+      </div>
+      <button id="status">Check</button>
     </section>
 
     <section class="profiles">
-      <div class="profile">
-        <div>
-          <h3>Security</h3>
-          <p>Security Center, antivirus, anti-fraud, behavior inspection.</p>
+      <div class="profile-row">
+        <div class="profile-main">
+          <div class="profile-title">
+            <h3 data-profile-title="security">Security</h3>
+            <span class="mode-pill" data-status="security">...</span>
+          </div>
+          <p>Security Center and antivirus services</p>
         </div>
-        <div class="buttons">
+        <div class="actions">
           <button data-mode="block" data-profile="security">Block</button>
           <button data-mode="restore" data-profile="security">Restore</button>
         </div>
       </div>
 
-      <div class="profile">
-        <div>
-          <h3>Background</h3>
-          <p>System Manager smart background and battery cleanup services.</p>
+      <div class="profile-row">
+        <div class="profile-main">
+          <div class="profile-title">
+            <h3 data-profile-title="background">Background</h3>
+            <span class="mode-pill" data-status="background">...</span>
+          </div>
+          <p>Smart background and cleanup policy</p>
         </div>
-        <div class="buttons">
+        <div class="actions">
           <button data-mode="block" data-profile="background">Block</button>
           <button data-mode="restore" data-profile="background">Restore</button>
         </div>
       </div>
 
-      <div class="profile">
-        <div>
-          <h3>PowerKit</h3>
-          <p>Experimental PowerGenie/PowerKit layer. Restore if Bluetooth, thermal, or battery pages misbehave.</p>
+      <div class="profile-row">
+        <div class="profile-main">
+          <div class="profile-title">
+            <h3 data-profile-title="powerkit">PowerKit</h3>
+            <span class="mode-pill" data-status="powerkit">...</span>
+          </div>
+          <p>Experimental power framework layer</p>
         </div>
-        <div class="buttons">
+        <div class="actions">
           <button data-mode="block" data-profile="powerkit">Block</button>
           <button data-mode="restore" data-profile="powerkit">Restore</button>
         </div>
