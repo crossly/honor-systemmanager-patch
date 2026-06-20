@@ -15,10 +15,43 @@
       <p id="version">Loading...</p>
     </header>
 
-    <section class="buttons">
-      <button id="status">Test Status</button>
-      <button id="block">Block Services</button>
-      <button id="restore">Restore Services</button>
+    <section class="toolbar">
+      <button id="status">Test All Status</button>
+    </section>
+
+    <section class="profiles">
+      <div class="profile">
+        <div>
+          <h3>Security</h3>
+          <p>Security Center, antivirus, anti-fraud, behavior inspection.</p>
+        </div>
+        <div class="buttons">
+          <button data-mode="block" data-profile="security">Block</button>
+          <button data-mode="restore" data-profile="security">Restore</button>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div>
+          <h3>Background</h3>
+          <p>System Manager smart background and battery cleanup services.</p>
+        </div>
+        <div class="buttons">
+          <button data-mode="block" data-profile="background">Block</button>
+          <button data-mode="restore" data-profile="background">Restore</button>
+        </div>
+      </div>
+
+      <div class="profile">
+        <div>
+          <h3>PowerKit</h3>
+          <p>Experimental PowerGenie/PowerKit layer. Restore if Bluetooth, thermal, or battery pages misbehave.</p>
+        </div>
+        <div class="buttons">
+          <button data-mode="block" data-profile="powerkit">Block</button>
+          <button data-mode="restore" data-profile="powerkit">Restore</button>
+        </div>
+      </div>
     </section>
 
     <section class="terminal">

@@ -2,4 +2,8 @@
 
 MODDIR=${0%/*}
 echo "restore" > "$MODDIR/mode"
-MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" restore >/dev/null 2>&1 || true
+mkdir -p "$MODDIR/modes"
+for profile in security background powerkit; do
+  echo "restore" > "$MODDIR/modes/$profile"
+  MODDIR="$MODDIR" sh "$MODDIR/common/patch.sh" restore "$profile" >/dev/null 2>&1 || true
+done

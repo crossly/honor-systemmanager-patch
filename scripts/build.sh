@@ -2,7 +2,8 @@
 set -eu
 
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
-OUT="$ROOT/dist/honor-systemmanager-patch-v1.2.0.zip"
+VERSION="$(awk -F= '$1 == "version" { print $2 }' "$ROOT/module/module.prop")"
+OUT="$ROOT/dist/honor-systemmanager-patch-$VERSION.zip"
 
 mkdir -p "$ROOT/dist"
 rm -f "$OUT"
@@ -16,6 +17,6 @@ chmod 0755 "$ROOT/module/META-INF/com/google/android/update-binary" \
   "$ROOT/module/uninstall.sh"
 
 cd "$ROOT/module"
-zip -r "$OUT" .
+zip -r "$OUT" . -x '*.DS_Store' '__MACOSX/*'
 
 echo "$OUT"

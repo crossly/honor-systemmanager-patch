@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<package-restrictions>
+  <pkg name="com.hihonor.systemmanager" enabled="0">
+    <disabled-components>
+      <item name="com.example.ExistingDisabledService" />
+    </disabled-components>
+  </pkg>
+  <pkg name="com.hihonor.powergenie" enabled="0">
+  </pkg>
+</package-restrictions>

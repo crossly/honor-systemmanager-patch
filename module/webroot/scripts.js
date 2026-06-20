@@ -1,5 +1,6 @@
 let running = false;
 const modulePath = "/data/adb/modules/honor-systemmanager-patch";
+const profiles = ["security", "background", "powerkit"];
 
 function output() {
   return document.getElementById("output");
@@ -48,8 +49,13 @@ async function run(label, command) {
 async function loadVersion() {
   try {
     const version = await exec(`grep '^version=' ${modulePath}/module.prop | cut -d= -f2`);
-    const mode = await exec(`cat ${modulePath}/mode 2>/dev/null || echo unknown`);
-    document.getElementById("version").textContent = `${version.trim()} · mode: ${mode.trim()}`;
+    const modes = await Promise.all(
+      profiles.map(async (profile) => {
+        const mode = await exec(`cat ${modulePath}/modes/${profile} 2>/dev/null || cat ${modulePath}/mode 2>/dev/null || echo unknown`);
+        return `${profile}: ${mode.trim()}`;
+      }),
+    );
+    document.getElementById("version").textContent = `${version.trim()} · ${modes.join(" · ")}`;
   } catch {
     document.getElementById("version").textContent = "module status unavailable";
   }
@@ -57,15 +63,18 @@ async function loadVersion() {
 
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("status").addEventListener("click", () => {
-    run("test current service status", `MODDIR=${modulePath} sh ${modulePath}/common/status.sh`);
+    run("test all profile status", `MODDIR=${modulePath} sh ${modulePath}/common/status.sh all`);
   });
-  document.getElementById("block").addEventListener("click", async () => {
-    await run("block services", `echo block > ${modulePath}/mode && MODDIR=${modulePath} sh ${modulePath}/common/patch.sh block && MODDIR=${modulePath} sh ${modulePath}/common/status.sh`);
-    loadVersion();
-  });
-  document.getElementById("restore").addEventListener("click", async () => {
-    await run("restore services", `echo restore > ${modulePath}/mode && MODDIR=${modulePath} sh ${modulePath}/common/patch.sh restore && MODDIR=${modulePath} sh ${modulePath}/common/status.sh`);
-    loadVersion();
+  document.querySelectorAll("button[data-mode][data-profile]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const mode = button.dataset.mode;
+      const profile = button.dataset.profile;
+      await run(
+        `${mode} ${profile}`,
+        `mkdir -p ${modulePath}/modes && echo ${mode} > ${modulePath}/modes/${profile} && MODDIR=${modulePath} sh ${modulePath}/common/patch.sh ${mode} ${profile} && MODDIR=${modulePath} sh ${modulePath}/common/status.sh ${profile}`,
+      );
+      loadVersion();
+    });
   });
   document.getElementById("clear").addEventListener("click", () => {
     output().textContent = "";

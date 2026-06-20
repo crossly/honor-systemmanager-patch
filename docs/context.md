@@ -58,6 +58,17 @@ Runtime services observed before patching included:
 - `.service.MainService`
 - `.spacecleanner.service.AppCleanUpService`
 - `.netassistant.CoreService`
+- `.power.service.BgPowerManagerService`
+- `.power.service.SavePowerManagerService`
+
+Additional background/power services observed during the background-killing investigation included:
+
+- `com.hihonor.powergenie/com.hihonor.android.powerkit.PowerKitService`
+- `com.hihonor.powergenie/.core.CoreService`
+- `com.hihonor.powergenie/.core.hibernation.PGASHStateService`
+- `com.hihonor.powergenie/com.hihonor.thermal.adapter.ThermalTraceService`
+
+`com.hihonor.powergenie` was granted broad power-management capabilities including `android.permission.KILL_UID`, `android.permission.KILL_BACKGROUND_PROCESSES`, `android.permission.KILL_ALL_BACKGROUND_PROCESSES`, and `android.permission.DEVICE_POWER`. This makes it a plausible part of HONOR's background process enforcement layer, but also makes it riskier to disable wholesale.
 
 ## Relevant Databases
 
@@ -90,20 +101,24 @@ Important files:
 - `wakeupapps`
 - `superpowerapps`
 
-For the target device, `unifiedpowerapps` showed that apps such as WeChat and Telegram were protected, while tools like Clash, the proxy app, KernelSU, and Shizuku were not protected by HONOR's own power policy table.
+For the target device, `unifiedpowerapps` showed that apps such as WeChat and Telegram were protected. GKD and the Samsung Watch7 plugin were also protected after manual tuning, while apps such as Samsung Wearable, Shizuku, and Clash were not consistently protected by HONOR's own power policy table. `forbiddenapps` was empty, so the observed issue looked more like HONOR's smart background/power policy layer than a standard Android appops restriction.
 
 ## Why Not Disable The Whole Package
 
 Disabling all of `com.hihonor.systemmanager` is high-risk because the package also owns or mediates permission management, traffic management, battery UI, security center UI, notification controls, and other system integration points.
 
-The chosen approach disables specific high-impact services while leaving selected infrastructure services active.
+The chosen approach disables specific high-impact services while leaving selected infrastructure services active. In v1.3.0 this was split into profiles so the background-killing parts can be tested independently:
+
+- `security`: original Security Center, antivirus, anti-fraud, behavior analysis, and System Manager targets.
+- `background`: System Manager smart power/background cleanup services and receivers.
+- `powerkit`: selected PowerGenie/PowerKit targets. This is intentionally experimental because PowerKit is coupled to system power APIs, thermal state, and Bluetooth/wearable behavior.
 
 Kept enabled:
 
 - `HoldService`: permission management
 - `CoreService`: network assistant
-- `BgPowerManagerService` and `SavePowerManagerService`: battery/power UI
 - `StorageMonitorService`: storage monitor
+- `com.hihonor.powergenie/.core.CoreService`: PowerGenie core service
 
 Disabled:
 
@@ -115,6 +130,8 @@ Disabled:
 - anti-fraud detection
 - ad blocking
 - privacy monthly report
+- optional smart background/power cleanup profile
+- optional selected PowerKit profile
 
 ## Why Package Restrictions
 
@@ -157,15 +174,23 @@ Observed results:
 
 ## Module Behavior
 
-The module supports two modes:
+The module supports two modes per profile:
 
 - `block`: insert selected components into `disabled-components`
 - `restore`: remove only this module's selected components from `disabled-components`
 
 Flash-time selection:
 
-- Volume Up: block
-- Volume Down: restore
-- Timeout: block
+- Volume Up: block `security`
+- Volume Down: restore `security`
+- Timeout: block `security`
+
+`background` and `powerkit` default to restore. Runtime state is stored under:
+
+```text
+/data/adb/modules/honor-systemmanager-patch/modes/security
+/data/adb/modules/honor-systemmanager-patch/modes/background
+/data/adb/modules/honor-systemmanager-patch/modes/powerkit
+```
 
 The module applies at `post-fs-data` and does a late pass at `service.sh`. A reboot is still recommended after switching mode because PackageManager loads restrictions during framework startup.

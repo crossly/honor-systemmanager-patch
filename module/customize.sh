@@ -11,10 +11,11 @@ ui_print() {
 
 choose_mode() {
   ui_print " "
-  ui_print "Choose install mode:"
-  ui_print "  Vol Up   = block HONOR System Manager services"
-  ui_print "  Vol Down = restore HONOR System Manager services"
-  ui_print "Waiting 15 seconds; default is Vol Up/block."
+  ui_print "Choose security profile install mode:"
+  ui_print "  Vol Up   = block Security/System Manager services"
+  ui_print "  Vol Down = restore Security/System Manager services"
+  ui_print "Background and PowerKit profiles default to restore."
+  ui_print "Waiting 15 seconds; default is Vol Up/block security."
 
   key=""
   if command -v timeout >/dev/null 2>&1 && command -v getevent >/dev/null 2>&1; then
@@ -23,14 +24,18 @@ choose_mode() {
 
   case "$key" in
     *KEY_VOLUMEDOWN*)
+      echo "restore" > "$MODPATH/modes/security"
       echo "restore" > "$MODPATH/mode"
-      ui_print "Selected: restore services"
+      ui_print "Selected: restore security profile"
       ;;
     *)
+      echo "block" > "$MODPATH/modes/security"
       echo "block" > "$MODPATH/mode"
-      ui_print "Selected: block services"
+      ui_print "Selected: block security profile"
       ;;
   esac
+  echo "restore" > "$MODPATH/modes/background"
+  echo "restore" > "$MODPATH/modes/powerkit"
 }
 
 set_permissions() {
@@ -50,8 +55,11 @@ on_install() {
   unzip -o "$ZIPFILE" 'webroot/*' -d "$MODPATH" >&2
   unzip -o "$ZIPFILE" 'module.prop' 'post-fs-data.sh' 'service.sh' 'uninstall.sh' -d "$MODPATH" >&2
   rm -f "$MODPATH/action.sh"
+  mkdir -p "$MODPATH/modes"
   choose_mode
-  ui_print "Applying selected package-restrictions patch once..."
-  MODDIR="$MODPATH" sh "$MODPATH/common/patch.sh" "$(cat "$MODPATH/mode")" || ui_print "Patch apply failed during install; it will retry on boot."
+  ui_print "Applying selected package-restrictions patches once..."
+  for profile in security background powerkit; do
+    MODDIR="$MODPATH" sh "$MODPATH/common/patch.sh" "$(cat "$MODPATH/modes/$profile")" "$profile" || ui_print "Patch apply failed for $profile; it will retry on boot."
+  done
   ui_print "Reboot required for PackageManager to reload service states cleanly."
 }

@@ -4,9 +4,19 @@ KernelSU/Magisk style module for disabling selected HONOR System Manager service
 
 This module was built for an HONOR BKQ-AN90 running Android 16 / MagicOS 10.0.0 with KernelSU root. It targets `com.hihonor.systemmanager` and patches Android per-user `package-restrictions.xml` so PackageManager treats selected HONOR System Manager components as disabled.
 
+## Profiles
+
+The module now has three independently controlled profiles:
+
+- `security`: Security Center, antivirus, anti-fraud, app behavior inspection, and the original System Manager service targets.
+- `background`: System Manager smart background/battery cleanup services. This is the first profile to try for aggressive app killing.
+- `powerkit`: selected PowerGenie/PowerKit services. This is experimental and more likely to affect Bluetooth wearables, thermal policy, battery pages, or system power APIs.
+
+The install-time volume key choice only controls `security`. `background` and `powerkit` default to `restore` and can be toggled from WebUI.
+
 ## What It Disables
 
-The block mode disables these components for user `0` and user `128`:
+The `security` profile disables these components for user `0` and user `128`:
 
 - `com.hihonor.securitycenter.mainservice.HwSecService`
 - `com.hihonor.systemmanager.appcontrol.service.SmartControlResidentService`
@@ -21,29 +31,45 @@ The block mode disables these components for user `0` and user `128`:
 - `com.hihonor.securitycenter.antifraud.audioevent.AudioDetectService`
 - `com.hihonor.securitycenter.privacy.monthlyreport.service.YoyoCardService`
 
+The `background` profile disables:
+
+- `com.hihonor.systemmanager.power.service.BgPowerManagerService`
+- `com.hihonor.systemmanager.power.service.SavePowerManagerService`
+- `com.hihonor.systemmanager.power.receiver.BootBroadcastReceiver`
+- `com.hihonor.systemmanager.power.receiver.ScheduleRecordPowerConsumeReceiver`
+- `com.hihonor.systemmanager.power.receiver.ScheduleRecordRemainTimeSceneReceiver`
+- `com.hihonor.systemmanager.power.receiver.UsageStatusReceiver`
+
+The `powerkit` profile disables:
+
+- `com.hihonor.powergenie.core.hibernation.PGASHStateService`
+- `com.hihonor.powergenie.core.contextaware.BrainNotifyService`
+- `com.hihonor.android.powerkit.PowerCheckerKitService`
+- `com.hihonor.android.powerkit.PowerKitService`
+
 It intentionally does not disable:
 
 - `com.hihonor.permission.HoldService`
 - `.netassistant.CoreService`
-- `.power.service.BgPowerManagerService`
-- `.power.service.SavePowerManagerService`
 - `.spacecleanner.service.StorageMonitorService`
 
-Those are left enabled to reduce the chance of breaking permission management, network statistics, storage UI, and battery settings.
+Those are left enabled to reduce the chance of breaking permission management, network statistics, and storage UI.
 
 ## Install
 
 Flash the zip from KernelSU Manager:
 
 ```text
-dist/honor-systemmanager-patch-v1.2.0.zip
+dist/honor-systemmanager-patch-v1.3.0.zip
 ```
 
 During install:
 
-- Volume Up: block selected services
-- Volume Down: restore selected services
-- No key within 15 seconds: default to block mode
+- Volume Up: block `security`
+- Volume Down: restore `security`
+- No key within 15 seconds: default to block `security`
+
+The `background` and `powerkit` profiles default to restore during install.
 
 Reboot after flashing. PackageManager only reloads component restrictions cleanly during framework startup.
 
@@ -51,9 +77,10 @@ Reboot after flashing. PackageManager only reloads component restrictions cleanl
 
 The module includes a KernelSU WebUI. Use the module's Open button to access all runtime functions:
 
-- Test Status
-- Block Services
-- Restore Services
+- Test all profile status
+- Block or restore `security`
+- Block or restore `background`
+- Block or restore `powerkit`
 
 Reboot after toggling for a clean PackageManager reload.
 
@@ -68,6 +95,12 @@ adb shell su -c 'MODDIR=/data/adb/modules/honor-systemmanager-patch /data/adb/mo
 ```
 
 Then reboot.
+
+Restore one profile:
+
+```sh
+adb shell su -c 'MODDIR=/data/adb/modules/honor-systemmanager-patch /data/adb/modules/honor-systemmanager-patch/common/patch.sh restore background'
+```
 
 ## How It Works
 
@@ -94,7 +127,7 @@ These files are Android Binary XML. The module uses the system tools:
 The flow is:
 
 1. Convert the current ABX file to XML.
-2. Find the `com.hihonor.systemmanager` package node.
+2. Find the target package node, such as `com.hihonor.systemmanager` or `com.hihonor.powergenie`.
 3. Insert or remove selected component names in `disabled-components`.
 4. Convert XML back to ABX.
 5. Replace the package restriction file atomically.
@@ -103,9 +136,15 @@ The module does not modify `/system`, the system APK, or boot/vendor partitions.
 
 ## Risk
 
-This is a root-level system behavior patch. It can affect HONOR security center, app startup management, antivirus, behavior detection, background cleanup, anti-fraud detection, and privacy reports.
+This is a root-level system behavior patch. It can affect HONOR security center, app startup management, antivirus, behavior detection, background cleanup, anti-fraud detection, privacy reports, and power management.
 
-If Settings, permission prompts, battery pages, or system manager pages behave badly, switch to restore mode or uninstall the module.
+Recommended order:
+
+1. Keep `security` blocked if the phone is stable.
+2. Try `background` next for aggressive background killing.
+3. Only try `powerkit` if `background` is not enough.
+
+If Settings, permission prompts, battery pages, Bluetooth wearables, thermal behavior, or system manager pages behave badly, restore the last profile you blocked or uninstall the module.
 
 ## Files
 
@@ -123,3 +162,9 @@ adb shell su -c 'MODDIR=/data/adb/modules/honor-systemmanager-patch /data/adb/mo
 ```
 
 The status check reports per-user package restriction state and whether any target service is currently running.
+
+Check one profile:
+
+```sh
+adb shell su -c 'MODDIR=/data/adb/modules/honor-systemmanager-patch /data/adb/modules/honor-systemmanager-patch/common/status.sh background'
+```

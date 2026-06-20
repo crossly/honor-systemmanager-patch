@@ -1,6 +1,6 @@
 id=honor-systemmanager-patch
 name=HONOR System Manager Patch
-version=v1.2.0
-versionCode=120
+version=v1.3.0
+versionCode=130
 author=Codex
-description=Disable or restore selected HONOR System Manager services via package restrictions.
+description=Disable or restore selected HONOR System Manager, background cleanup, and PowerKit services via package restrictions.

@@ -32,11 +32,41 @@ p {
   font-size: 14px;
 }
 
-.buttons {
+.toolbar {
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.profiles {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.profile {
+  border: 1px solid #353842;
+  border-radius: 8px;
+  padding: 12px;
+  background: #181a20;
+}
+
+.profile h3 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.profile p {
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 button {
@@ -51,6 +81,16 @@ button {
 
 button:active {
   background: #2b303a;
+}
+
+button[data-mode="block"] {
+  border-color: #73413e;
+  background: #322120;
+}
+
+button[data-mode="restore"] {
+  border-color: #355c48;
+  background: #1f2d27;
 }
 
 .terminal {
