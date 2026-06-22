@@ -205,11 +205,12 @@ before testing Recents:
   components under `enabled-components` as blocked. The status check now only
   counts entries inside `disabled-components`.
 - Online restore can add explicit `enabled-components` entries through
-  `cmd package enable`. A later block must remove those entries from XML and
-  clear PackageManager's explicit enabled state. MagicOS rejects
-  `cmd package disable-user` for this privileged package, but accepts
-  `cmd package default-state`, so block now applies `default-state` before
-  patching XML.
+  `cmd package enable`. A later block must remove those entries from XML.
+  MagicOS rejects `cmd package disable-user` for this privileged package.
+  `cmd package default-state` was tested and appeared to help briefly, but
+  PackageManager later wrote user `0` runtime state back to the restrictions
+  file. Therefore online block should be treated as "next boot" configuration;
+  reboot is the reliable application point.
 
 Recents provider on this device:
 

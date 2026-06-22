@@ -85,10 +85,7 @@ PATH="$ROOT/tests/fakebin:$PATH" \
   MODDIR="$MODULE" DATA_ROOT="$DATA_ROOT" WORK_ROOT="$WORK_ROOT" CMD_LOG="$CMD_LOG" \
   sh "$MODULE/common/patch.sh" block background
 
-assert_contains "$CMD_LOG" "package disable-user --user 0 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
-assert_contains "$CMD_LOG" "package disable-user --user 128 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
-assert_contains "$CMD_LOG" "package default-state --user 0 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
-assert_contains "$CMD_LOG" "package default-state --user 128 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_enabled_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.BgPowerManagerService"
 
 : > "$CMD_LOG"
 PATH="$ROOT/tests/fakebin:$PATH" \

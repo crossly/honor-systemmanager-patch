@@ -60,7 +60,7 @@ Those are left enabled to reduce the chance of breaking permission management, n
 Flash the zip from KernelSU Manager:
 
 ```text
-dist/honor-systemmanager-patch-v1.3.1.zip
+dist/honor-systemmanager-patch-v1.3.2.zip
 ```
 
 During install:
@@ -86,11 +86,10 @@ Reboot after toggling for a clean PackageManager reload.
 
 On MagicOS 10, online restore is more direct than online block. The module calls
 `cmd package enable` during restore so PackageManager's in-memory state is
-updated immediately. For block mode, HONOR rejects the matching
-`disable-user` command for this privileged package, so v1.3.1 first clears any
-explicit enabled override with `cmd package default-state`, then writes the
-restriction file. Reboot after switching modes when you want the cleanest
-PackageManager reload.
+updated immediately. HONOR rejects the matching `disable-user` command for this
+privileged package, and PackageManager can later write its in-memory user `0`
+state back to `package-restrictions.xml`. Treat block mode changes as a
+configuration for the next boot and reboot after switching to block.
 
 ## Uninstall / Restore
 
@@ -136,11 +135,10 @@ The flow is:
 
 1. Convert the current ABX file to XML.
 2. Find the target package node, such as `com.hihonor.systemmanager` or `com.hihonor.powergenie`.
-3. During block, clear explicit enabled overrides with `cmd package default-state`.
-4. Insert or remove selected component names in `disabled-components`.
-5. Remove conflicting selected names from `enabled-components` during block.
-6. Convert XML back to ABX.
-7. Replace the package restriction file atomically.
+3. Insert or remove selected component names in `disabled-components`.
+4. Remove conflicting selected names from `enabled-components` during block.
+5. Convert XML back to ABX.
+6. Replace the package restriction file atomically.
 
 Status checks only count names under `disabled-components`. A component can
 legitimately appear under `enabled-components` after restore and must not be

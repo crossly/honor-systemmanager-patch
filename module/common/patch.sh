@@ -211,26 +211,6 @@ sync_runtime_restore() {
   done < "$list"
 }
 
-sync_runtime_block() {
-  user="$1"
-  pkg="$2"
-  list="$3"
-  command -v cmd >/dev/null 2>&1 || return 0
-  while IFS= read -r component; do
-    [ -n "$component" ] || continue
-    if cmd package default-state --user "$user" "$pkg/$component" >/dev/null 2>&1; then
-      log "user $user pkg $pkg component $component: runtime default-state applied"
-    else
-      log "user $user pkg $pkg component $component: runtime default-state failed"
-    fi
-    if cmd package disable-user --user "$user" "$pkg/$component" >/dev/null 2>&1; then
-      log "user $user pkg $pkg component $component: runtime disabled"
-    else
-      log "user $user pkg $pkg component $component: runtime disable failed"
-    fi
-  done < "$list"
-}
-
 apply_mode() {
   mode="$1"
   ensure_tools
@@ -244,7 +224,6 @@ apply_mode() {
     make_pkg_list "$pkg" "$list"
     [ -s "$list" ] || continue
     for user in $USERS; do
-      [ "$mode" = "block" ] && sync_runtime_block "$user" "$pkg" "$list"
       [ "$mode" = "restore" ] && sync_runtime_restore "$user" "$pkg" "$list"
       process_user "$user" "$mode" "$pkg" "$list"
     done
