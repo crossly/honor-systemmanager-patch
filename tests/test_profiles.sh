@@ -6,6 +6,7 @@ TMP="${TMPDIR:-/tmp}/honor-systemmanager-patch-test.$$"
 MODULE="$TMP/module"
 DATA_ROOT="$TMP/data"
 WORK_ROOT="$TMP/work"
+CMD_LOG="$TMP/cmd.log"
 
 cleanup() {
   rm -rf "$TMP"
@@ -31,6 +32,22 @@ assert_not_contains() {
   fi
 }
 
+assert_disabled_not_contains() {
+  file="$1"
+  needle="$2"
+  if sed -n '/<disabled-components>/,/<\/disabled-components>/p' "$file" | grep -Fq "$needle"; then
+    fail "expected disabled-components in $file not to contain $needle"
+  fi
+}
+
+assert_enabled_not_contains() {
+  file="$1"
+  needle="$2"
+  if sed -n '/<enabled-components>/,/<\/enabled-components>/p' "$file" | grep -Fq "$needle"; then
+    fail "expected enabled-components in $file not to contain $needle"
+  fi
+}
+
 mkdir -p "$MODULE" "$DATA_ROOT/system/users/0" "$DATA_ROOT/system/users/128" "$WORK_ROOT"
 cp -R "$ROOT/module/." "$MODULE/"
 cp "$ROOT/tests/fixtures/package-restrictions.xml" "$DATA_ROOT/system/users/0/package-restrictions.xml"
@@ -42,6 +59,7 @@ PATH="$ROOT/tests/fakebin:$PATH" \
 
 assert_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.BgPowerManagerService"
 assert_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.SavePowerManagerService"
+assert_enabled_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.BgPowerManagerService"
 assert_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.securitycenter.mainservice.HwSecService"
 assert_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.android.powerkit.PowerKitService"
 
@@ -53,12 +71,29 @@ assert_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihono
 assert_contains "$DATA_ROOT/system/users/128/package-restrictions.xml" "com.hihonor.android.powerkit.PowerKitService"
 
 PATH="$ROOT/tests/fakebin:$PATH" \
-  MODDIR="$MODULE" DATA_ROOT="$DATA_ROOT" WORK_ROOT="$WORK_ROOT" \
+  MODDIR="$MODULE" DATA_ROOT="$DATA_ROOT" WORK_ROOT="$WORK_ROOT" CMD_LOG="$CMD_LOG" \
   sh "$MODULE/common/patch.sh" restore background
 
-assert_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_disabled_not_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.systemmanager.power.service.BgPowerManagerService"
 assert_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.hihonor.android.powerkit.PowerKitService"
 assert_contains "$DATA_ROOT/system/users/0/package-restrictions.xml" "com.example.ExistingDisabledService"
+assert_contains "$CMD_LOG" "package enable --user 0 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_contains "$CMD_LOG" "package enable --user 128 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+
+: > "$CMD_LOG"
+PATH="$ROOT/tests/fakebin:$PATH" \
+  MODDIR="$MODULE" DATA_ROOT="$DATA_ROOT" WORK_ROOT="$WORK_ROOT" CMD_LOG="$CMD_LOG" \
+  sh "$MODULE/common/patch.sh" block background
+
+assert_contains "$CMD_LOG" "package disable-user --user 0 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_contains "$CMD_LOG" "package disable-user --user 128 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_contains "$CMD_LOG" "package default-state --user 0 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+assert_contains "$CMD_LOG" "package default-state --user 128 com.hihonor.systemmanager/com.hihonor.systemmanager.power.service.BgPowerManagerService"
+
+: > "$CMD_LOG"
+PATH="$ROOT/tests/fakebin:$PATH" \
+  MODDIR="$MODULE" DATA_ROOT="$DATA_ROOT" WORK_ROOT="$WORK_ROOT" CMD_LOG="$CMD_LOG" \
+  sh "$MODULE/common/patch.sh" restore background
 
 status_output="$TMP/status.out"
 PATH="$ROOT/tests/fakebin:$PATH" \
@@ -67,6 +102,7 @@ PATH="$ROOT/tests/fakebin:$PATH" \
 
 assert_contains "$status_output" "Profile: background"
 assert_contains "$status_output" "Profile: powerkit"
+assert_contains "$status_output" "active : com.hihonor.systemmanager.power.service.BgPowerManagerService"
 assert_contains "$status_output" "com.hihonor.powergenie"
 assert_contains "$status_output" "summary:"
 

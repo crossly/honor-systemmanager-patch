@@ -51,6 +51,10 @@ package_block() {
   sed -n "/<pkg .*name=\"$pkg\"/,/<\\/pkg>/p" "$xml"
 }
 
+disabled_block() {
+  sed -n '/<disabled-components>/,/<\/disabled-components>/p'
+}
+
 mode_for_profile() {
   profile="$1"
   cat "$MODDIR/modes/$profile" 2>/dev/null || cat "$MODDIR/mode" 2>/dev/null || echo unknown
@@ -76,7 +80,7 @@ check_user_profile_pkg() {
     return
   }
 
-  pkg_block="$(package_block "$pkg" "$xml")"
+  pkg_block="$(package_block "$pkg" "$xml" | disabled_block)"
   while IFS= read -r component; do
     [ -n "$component" ] || continue
     total=$((total + 1))

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+set -eu
+if [ -n "${CMD_LOG:-}" ]; then
+  echo "$*" >> "$CMD_LOG"
+fi

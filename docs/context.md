@@ -194,3 +194,44 @@ Flash-time selection:
 ```
 
 The module applies at `post-fs-data` and does a late pass at `service.sh`. A reboot is still recommended after switching mode because PackageManager loads restrictions during framework startup.
+
+## 2026-06-23 Recents And Runtime-State Follow-Up
+
+After blocking the background-cleanup profile, Recents swipe-up dismissal was
+suspected to be broken. A controlled check found two separate module issues
+before testing Recents:
+
+- `status.sh` was reading the whole package block and therefore counted
+  components under `enabled-components` as blocked. The status check now only
+  counts entries inside `disabled-components`.
+- Online restore can add explicit `enabled-components` entries through
+  `cmd package enable`. A later block must remove those entries from XML and
+  clear PackageManager's explicit enabled state. MagicOS rejects
+  `cmd package disable-user` for this privileged package, but accepts
+  `cmd package default-state`, so block now applies `default-state` before
+  patching XML.
+
+Recents provider on this device:
+
+```text
+com.hihonor.android.launcher/.quickstep.RecentsActivity
+com.hihonor.android.launcher/.quickstep.TouchInteractionService
+```
+
+The launcher has task-management permissions such as `REMOVE_TASKS`,
+`MANAGE_ACTIVITY_TASKS`, and `START_TASKS_FROM_RECENTS`, so basic Recents card
+dismissal should not depend on System Manager alone.
+
+ADB gesture tests confirmed:
+
+- With all profiles restored, swiping a Recents card upward removed the task.
+- With `background` blocked and `powerkit` restored, swiping upward still
+  removed the task.
+- With both `security` and `background` blocked, swiping upward still removed
+  the tested task.
+
+Current conclusion: the `background` profile is not a confirmed cause of
+Recents swipe-up failure. If the issue appears again, first reboot after the
+mode change and re-run status. If it persists, restore `security` before
+`background`, because `security` contains the higher-risk cleanup/System Manager
+services (`MainService`, `AppCleanUpService`, and related policy services).
