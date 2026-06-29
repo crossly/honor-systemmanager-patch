@@ -1,8 +1,6 @@
 security|com.hihonor.systemmanager|com.hihonor.securitycenter.mainservice.HwSecService
 security|com.hihonor.systemmanager|com.hihonor.securitycenter.antifraud.audioevent.AudioDetectService
 security|com.hihonor.systemmanager|com.hihonor.antivirus.AntiVirusService
-security|com.hihonor.systemmanager|com.hihonor.systemmanager.service.MainService
-security|com.hihonor.systemmanager|com.hihonor.systemmanager.spacecleanner.service.AppCleanUpService
 security|com.hihonor.systemmanager|com.hihonor.securitycenter.privacy.monthlyreport.service.YoyoCardService
 security|com.hihonor.systemmanager|com.hihonor.securitycenter.antifraud.fakedetect.FakeDetectService
 security|com.hihonor.systemmanager|com.hihonor.securitycenter.blockads.BlockAdsService

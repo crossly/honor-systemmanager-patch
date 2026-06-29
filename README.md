@@ -20,8 +20,6 @@ The `security` profile disables these components for user `0` and user `128`:
 
 - `com.hihonor.securitycenter.mainservice.HwSecService`
 - `com.hihonor.systemmanager.appcontrol.service.SmartControlResidentService`
-- `com.hihonor.systemmanager.service.MainService`
-- `com.hihonor.systemmanager.spacecleanner.service.AppCleanUpService`
 - `com.hihonor.antivirus.AntiVirusService`
 - `com.hihonor.android.security.analyzer.AppBehaviorDataAnalyzerService`
 - `com.hihonor.android.security.inspection.AppBASMngService`
@@ -50,17 +48,20 @@ The `powerkit` profile disables:
 It intentionally does not disable:
 
 - `com.hihonor.permission.HoldService`
+- `com.hihonor.systemmanager.service.MainService`
+- `com.hihonor.systemmanager.spacecleanner.service.AppCleanUpService`
 - `.netassistant.CoreService`
 - `.spacecleanner.service.StorageMonitorService`
 
-Those are left enabled to reduce the chance of breaking permission management, network statistics, and storage UI.
+Those are left enabled to reduce the chance of breaking permission management,
+Recents swipe-up cleanup, network statistics, and storage UI.
 
 ## Install
 
 Flash the zip from KernelSU Manager:
 
 ```text
-dist/honor-systemmanager-patch-v1.3.2.zip
+dist/honor-systemmanager-patch-v1.3.3.zip
 ```
 
 During install:
@@ -154,16 +155,17 @@ com.hihonor.android.launcher/.quickstep.RecentsActivity
 com.hihonor.android.launcher/.quickstep.TouchInteractionService
 ```
 
-With all profiles restored, swiping a Recents card upward removed the task. With
-`background` blocked and `powerkit` restored, the same swipe-up dismissal still
-worked. With both `security` and `background` blocked, the tested swipe-up
-dismissal also removed the task. Based on those tests, the current
-`background` profile is not a confirmed cause of Recents swipe-up failure.
+With all profiles restored, swiping a Recents card upward removed the task.
+Further testing showed that `com.hihonor.systemmanager.service.MainService` and
+`com.hihonor.systemmanager.spacecleanner.service.AppCleanUpService` must remain
+active for reliable swipe-up cleanup. The current target list keeps those two
+services active while still blocking the `background` and `powerkit` targets,
+including `BgPowerManagerService` and `PowerKitService`.
 
 If Recents dismissal fails after toggling profiles online, reboot first and run
-the WebUI status check again. If it still fails, restore `security` before
-`background`; `security` contains the higher-risk System Manager cleanup targets
-such as `MainService` and `AppCleanUpService`.
+the WebUI status check again. If it still fails, make sure `MainService` and
+`AppCleanUpService` do not appear under `disabledComponents` for
+`com.hihonor.systemmanager`.
 
 The module does not modify `/system`, the system APK, or boot/vendor partitions.
 
